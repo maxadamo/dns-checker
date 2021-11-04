@@ -59,7 +59,7 @@ func checkDNS(proto string, DNSport string, consulPort string, recordDNS string,
 	serverConsulandPort := fmt.Sprintf("127.0.0.1:%v", consulPort)
 	if proto == "ipv6" {
 		serverDNSandPort = fmt.Sprintf("[::1]:%v", DNSport)
-		serverConsulandPort = fmt.Sprintf("127.0.0.1:%v", consulPort)
+		serverConsulandPort = fmt.Sprintf("[::1]:%v", consulPort)
 	}
 	t := &net.Resolver{
 		PreferGo: true,
