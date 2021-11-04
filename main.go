@@ -19,7 +19,7 @@ type checkStatus struct {
 	dnsStatus string
 }
 
-const statusHTML string = `<!DOCTYPE html>
+var statusTemplate, _ = template.New("status template").Parse(`<!DOCTYPE html>
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -29,20 +29,28 @@ const statusHTML string = `<!DOCTYPE html>
     <p>{{.dnsStatus}}</p>
   </body>
 </html>
-`
-
-var statusTemplate = template.Must(template.ParseFiles("dns_status.html"))
+`)
 
 var (
-	buf          bytes.Buffer
-	appVersion   string
-	buildTime    string
-	consulBool   bool
-	dnsPort      string
-	consulPort   string
-	dnsRecord    string
-	consulRecord string
+	buf           bytes.Buffer
+	appVersion    string
+	buildTime     string
+	consulBool    bool
+	dnsPort       string
+	consulPort    string
+	dnsRecord     string
+	consulRecord  string
+	WarningLogger *log.Logger
+	InfoLogger    *log.Logger
+	ErrorLogger   *log.Logger
+	verbose       bool
 )
+
+func init() {
+	InfoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+	WarningLogger = log.New(os.Stdout, "WARNING: ", log.Ldate|log.Ltime)
+	ErrorLogger = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime)
+}
 
 // check DNS
 func checkDNS(proto string, DNSport string, consulPort string, recordDNS string, recordConsul string, isConsul bool) string {
@@ -101,8 +109,9 @@ func checkDNS(proto string, DNSport string, consulPort string, recordDNS string,
 func ipv4(w http.ResponseWriter, req *http.Request) {
 	ipv4_dns_status := checkDNS("ipv4", dnsPort, consulPort, dnsRecord, consulRecord, consulBool)
 	parse := checkStatus{dnsStatus: ipv4_dns_status}
-	// tmplt, _ := template.ParseFiles("./dns_status.html")
-	fmt.Printf("%v\n", ipv4_dns_status)
+	if verbose {
+		InfoLogger.Println(ipv4_dns_status)
+	}
 	if ipv4_dns_status == "DNS is UP" {
 		w.WriteHeader(http.StatusOK)
 		statusTemplate.Execute(w, parse)
@@ -114,10 +123,11 @@ func ipv4(w http.ResponseWriter, req *http.Request) {
 
 func ipv6(w http.ResponseWriter, req *http.Request) {
 	ipv6_dns_status := checkDNS("ipv6", dnsPort, consulPort, dnsRecord, consulRecord, consulBool)
-	tmpl := template.New("DNS template")
-	tmpl, _ = tmpl.Parse(statusHTML)
 	parse := checkStatus{dnsStatus: ipv6_dns_status}
-	_ = tmpl.Execute(&buf, parse)
+	_ = statusTemplate.Execute(&buf, parse)
+	if verbose {
+		InfoLogger.Println(ipv6_dns_status)
+	}
 
 	output := buf.String()
 	if ipv6_dns_status == "DNS is UP" {
@@ -135,7 +145,8 @@ func main() {
   - checks DNS and optionally Consul and report the status on a Web page
   
 Usage:
-  %v [--dns-port=DNSPORT] [--consul-port=CONSULPORT] [--dns-record=DNSRECORD] [--consul-record=CONSULRECORD] [--consul] [--ipv6] [--listen-port=LISTENPORT]
+  %v [--dns-port=DNSPORT] [--consul-port=CONSULPORT] [--dns-record=DNSRECORD] [--consul-record=CONSULRECORD] [--consul] [--verbose] [--ipv6] [--listen-port=LISTENPORT]
+
   %v -h | --help
   %v -v | --version
   %v -b | --build
@@ -151,6 +162,7 @@ Options:
   --consul                          Check consul DNS as well
   --ipv6                            Check IPv6 too
   --listen-port=LISTENPORT          Web server port [default: 10053]
+  --verbose                         Log connections
 `, progName, progName, progName, progName)
 
 	arguments, _ := docopt.ParseArgs(usage, nil, appVersion)
@@ -160,10 +172,13 @@ Options:
 		os.Exit(0)
 	}
 
+	consulBool = false
 	if arguments["--consul"] == true {
 		consulBool = true
-	} else {
-		consulBool = false
+	}
+	verbose = false
+	if arguments["--verbose"] == true {
+		verbose = true
 	}
 
 	listenPort := arguments["--listen-port"].(string)
