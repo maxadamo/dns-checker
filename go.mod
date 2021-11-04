@@ -1,4 +1,4 @@
-module dns_checker
+module dns-checker
 
 go 1.17
 
