@@ -102,7 +102,7 @@ func ipv4(w http.ResponseWriter, req *http.Request) {
 	ipv4_dns_status := checkDNS("ipv4", dnsPort, consulPort, dnsRecord, consulRecord, consulBool)
 	parse := checkStatus{dnsStatus: ipv4_dns_status}
 	// tmplt, _ := template.ParseFiles("./dns_status.html")
-	fmt.Print(ipv4_dns_status)
+	fmt.Printf("%v\n", ipv4_dns_status)
 	if ipv4_dns_status == "DNS is UP" {
 		w.WriteHeader(http.StatusOK)
 		statusTemplate.Execute(w, parse)
