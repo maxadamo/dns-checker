@@ -1,23 +1,18 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
-	"text/template"
 	"time"
 
 	"github.com/docopt/docopt-go"
 )
-
-type checkStatus struct {
-	dnsStatus string
-}
 
 var statusTemplate, _ = template.New("status template").Parse(`<!DOCTYPE html>
 <html>
@@ -26,13 +21,12 @@ var statusTemplate, _ = template.New("status template").Parse(`<!DOCTYPE html>
     <title></title>
   </head>
   <body>
-    <p>{{.dnsStatus}}</p>
+    <p>{{.}}</p>
   </body>
 </html>
 `)
 
 var (
-	buf           bytes.Buffer
 	appVersion    string
 	buildTime     string
 	consulBool    bool
@@ -108,32 +102,29 @@ func checkDNS(proto string, DNSport string, consulPort string, recordDNS string,
 
 func ipv4(w http.ResponseWriter, req *http.Request) {
 	ipv4_dns_status := checkDNS("ipv4", dnsPort, consulPort, dnsRecord, consulRecord, consulBool)
-	parse := checkStatus{dnsStatus: ipv4_dns_status}
 	if verbose {
 		InfoLogger.Println(ipv4_dns_status)
 	}
 	if ipv4_dns_status == "DNS is UP" {
 		w.WriteHeader(http.StatusOK)
-		statusTemplate.Execute(w, parse)
+		statusTemplate.Execute(w, template.HTML(ipv4_dns_status))
 	} else {
 		w.WriteHeader(http.StatusServiceUnavailable)
-		statusTemplate.Execute(w, parse)
+		statusTemplate.Execute(w, template.HTML(ipv4_dns_status))
 	}
 }
 
 func ipv6(w http.ResponseWriter, req *http.Request) {
 	ipv6_dns_status := checkDNS("ipv6", dnsPort, consulPort, dnsRecord, consulRecord, consulBool)
-	parse := checkStatus{dnsStatus: ipv6_dns_status}
-	_ = statusTemplate.Execute(&buf, parse)
 	if verbose {
 		InfoLogger.Println(ipv6_dns_status)
 	}
-
-	output := buf.String()
 	if ipv6_dns_status == "DNS is UP" {
-		fmt.Fprintf(w, "%v\n", output)
+		w.WriteHeader(http.StatusOK)
+		statusTemplate.Execute(w, template.HTML(ipv6_dns_status))
 	} else {
-		http.Error(w, output, http.StatusServiceUnavailable)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		statusTemplate.Execute(w, template.HTML(ipv6_dns_status))
 	}
 }
 
