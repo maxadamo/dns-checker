@@ -58,11 +58,13 @@ the digest is calculated using this command (`genhash` belongs to keepalived pac
 genhash -s 127.0.0.1 -p 10053 -u /ipv4
 ```
 
-And you'll get the same digest as mine, because the digest is computed against the small HTML snippet embedded in the `main.go`.
+And if you receive a 200 status code, you'll get the same digest as mine, because the digest is computed against the small HTML snippet embedded in the `main.go`.
 
 You could also use the HTTP status code: `man keepalived.conf` and search for `status_code`.
 
 ## Available options
+
+You can check the options as follows:
 
 ```shell
 $ dns-checker --help
@@ -86,6 +88,12 @@ Options:
   --consul                          Check consul DNS as well
   --listen-port=LISTENPORT          Web server port [default: 10053]
   --verbose                         Log also successful connections
+```
+
+Once it is installed you can check the status using curl (with `curl -I` you get the status code):
+
+```bash
+curl http://localhost:10053/ipv4
 ```
 
 ## Setting up systemd
@@ -117,7 +125,7 @@ SyslogIdentifier=dns-checker
 WantedBy=multi-user.target
 ```
 
-you don't need to run it as root :-)
+you can change user and group as you don't need to run it as root :-)
 
 ## ToDo
 
