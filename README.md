@@ -13,7 +13,11 @@
 
 This application checks the local DNS and optionally consul and serves the status through a Web page.
 
-It should be run as daemon and it can to be used in conjunction with your UDP load-balancer or you can also use this application from Nagios, Sensu and issue a simple HTTP check.
+What problems tries to solve this application? UDP can't be easily checked. I run a check and report it through HTTP status code.
+
+This application runs as a daemon on the same machine running the DNS and it can to be used in conjunction with your UDP load-balancer to check the status of your DNS.
+
+You can also use it from Nagios, Sensu and issue a simple HTTP check.
 
 ## Compiling the program
 
