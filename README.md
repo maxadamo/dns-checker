@@ -17,12 +17,15 @@ It should be run as daemon and it can to be used in conjunction with your UDP lo
 
 ## Compiling the program
 
-You can install GO and copy/paste the following:
+You can install GO and copy/paste the followings:
 
 ```shell
+git checkout main
+git pull
 LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
 PROG_VERSION=${LATEST_TAG:1}
 BUILD_TIME=$(date -u '+%Y-%m-%d_%H:%M:%S')
+git checkout $LATEST_TAG
 
 go get -ldflags "-s -w -X main.appVersion=${PROG_VERSION} -X main.buildTime=${BUILD_TIME}" .
 ```
@@ -83,9 +86,9 @@ Options:
 
 ## Setting up systemd
 
-In this case are checking for Consul, and we check the existance of one local record called `dumb-record.dumb.zone` in the DNS and one record called `consul.service.domain.org` in Consul.
+In this case I am also checking for Consul, and I check the existance of one local record called `dumb-record.dumb.zone` in the DNS and one record called `consul.service.domain.org` in Consul.
 
-It is not sensible to check for a record on a forwarded zone, because we can have a problem in the network, or in he SOA of the other domain and we don't want to bring our DNS down if something else is broken. 
+It is not sensible to check for a record on a forwarded zone, because there can be a problem in the network, or in he SOA of the other domain and we don't want to bring our DNS down if something else is broken.
 
 ```systemd
 #
@@ -109,6 +112,8 @@ SyslogIdentifier=dns-checker
 [Install]
 WantedBy=multi-user.target
 ```
+
+you don't need to run it as root :-)
 
 ## ToDo
 
