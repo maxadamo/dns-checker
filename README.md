@@ -7,7 +7,6 @@
 3. [Keepalived and LVS](#keepalived-and-LVS)
 4. [Available options](#available-options)
 5. [Setting up systemd](#setting-up-systemd)
-6. [ToDo](#todo)
 
 ## Preamble
 
@@ -72,7 +71,7 @@ DNS Checker:
   - checks DNS and optionally Consul and report the status on a Web page
   
 Usage:
-  dns-checker [--dns-port=DNSPORT] [--consul-port=CONSULPORT] --dns-record=DNSRECORD [--consul-record=CONSULRECORD] [--consul] [--verbose] [--listen-port=LISTENPORT]
+  dns-checker --dns-record=DNSRECORD [--dns-port=DNSPORT] [--consul-port=CONSULPORT] [--consul-record=CONSULRECORD] [--consul] [--verbose] [--listen-port=LISTENPORT] [--listen-address=LISTENADDRESS]
   dns-checker -h | --help
   dns-checker -b | --build
   dns-checker -v | --version
@@ -81,12 +80,13 @@ Options:
   -h --help                         Show this screen
   -v --version                      Print version information and exit
   -b --build                        Print version and build information and exit
+  --dns-record=DNSRECORD            DNS record to check. A local record is recommended.
   --dns-port=DNSPORT                DNS port [default: 53]
   --consul-port=CONSULPORT          Consul port [default: 8600]
-  --dns-record=DNSRECORD            DNS record to check. A local record is recommended.
   --consul-record=CONSULRECORD      Consul record to check [default: consul.service.consul]
   --consul                          Check consul DNS as well
   --listen-port=LISTENPORT          Web server port [default: 10053]
+  --listen-address=LISTENADDRESS    Web server address. Check Go net/http documentation [default: any]
   --verbose                         Log also successful connections
 ```
 
@@ -126,8 +126,3 @@ WantedBy=multi-user.target
 ```
 
 you can change user and group as you don't need to run it as root :-)
-
-## ToDo
-
-Add an option to select the interfaces, IPs.
-Now it listens on every interface and every protocol (I have dual stack IPv4 and IPv6) and you have to use a firewall if necessary.

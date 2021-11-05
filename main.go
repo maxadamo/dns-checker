@@ -141,7 +141,7 @@ func main() {
   - checks DNS and optionally Consul and report the status on a Web page
   
 Usage:
-  %v [--dns-port=DNSPORT] [--consul-port=CONSULPORT] --dns-record=DNSRECORD [--consul-record=CONSULRECORD] [--consul] [--verbose] [--listen-port=LISTENPORT]
+  %v --dns-record=DNSRECORD [--dns-port=DNSPORT] [--consul-port=CONSULPORT] [--consul-record=CONSULRECORD] [--consul] [--verbose] [--listen-port=LISTENPORT] [--listen-address=LISTENADDRESS]
   %v -h | --help
   %v -b | --build
   %v -v | --version
@@ -150,12 +150,13 @@ Options:
   -h --help                         Show this screen
   -v --version                      Print version information and exit
   -b --build                        Print version and build information and exit
+  --dns-record=DNSRECORD            DNS record to check. A local record is recommended.
   --dns-port=DNSPORT                DNS port [default: 53]
   --consul-port=CONSULPORT          Consul port [default: 8600]
-  --dns-record=DNSRECORD            DNS record to check. A local record is recommended.
   --consul-record=CONSULRECORD      Consul record to check [default: consul.service.consul]
   --consul                          Check consul DNS as well
   --listen-port=LISTENPORT          Web server port [default: 10053]
+  --listen-address=LISTENADDRESS    Web server address. Check Go net/http documentation [default: any]
   --verbose                         Log also successful connections
 `, progName, progName, progName, progName)
 
@@ -175,16 +176,20 @@ Options:
 		verbose = true
 	}
 
-	listenPort := arguments["--listen-port"].(string)
-
 	dnsPort = arguments["--dns-port"].(string)
 	consulPort = arguments["--consul-port"].(string)
 	dnsRecord = arguments["--dns-record"].(string)
 	consulRecord = arguments["--consul-record"].(string)
+	listenPort := arguments["--listen-port"].(string)
+	listenAddress := arguments["--listen-address"].(string)
 
 	http.HandleFunc("/ipv4", ipv4)
 	http.HandleFunc("/ipv6", ipv6) // IPv6 can be left on by default. If not needed it won't be used.
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), nil))
+	if listenAddress == "any" {
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), nil))
+	} else {
+		log.Fatal(http.ListenAndServe(fmt.Sprintf("%v:%v", listenAddress, listenPort), nil))
+	}
 
 }
