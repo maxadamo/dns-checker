@@ -143,12 +143,10 @@ func main() {
 Usage:
   %v [--dns-port=DNSPORT] [--consul-port=CONSULPORT] --dns-record=DNSRECORD [--consul-record=CONSULRECORD] [--consul] [--verbose] [--listen-port=LISTENPORT]
   %v -h | --help
-  %v -v | --version
   %v -b | --build
   
 Options:
   -h --help                         Show this screen
-  -v --version                      Print version information and exit
   -b --build                        Print version and build information and exit
   --dns-port=DNSPORT                DNS port [default: 53]
   --consul-port=CONSULPORT          Consul port [default: 8600]
@@ -157,7 +155,7 @@ Options:
   --consul                          Check consul DNS as well
   --listen-port=LISTENPORT          Web server port [default: 10053]
   --verbose                         Log also successful connections
-`, progName, progName, progName, progName)
+`, progName, progName, progName)
 
 	arguments, _ := docopt.ParseArgs(usage, nil, appVersion)
 
