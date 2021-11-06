@@ -141,13 +141,13 @@ func main() {
 Usage:
   %v --dns-record=DNSRECORD [--dns-port=DNSPORT] [--consul] [--consul-record=CONSULRECORD] [--consul-port=CONSULPORT] [--listen-address=LISTENADDRESS] [--listen-port=LISTENPORT] [--verbose]
   %v -h | --help
-  %v -v | --version
   %v -b | --build
+  %v -v | --version
 
 Options:
   -h --help                         Show this screen
-  -v --version                      Print version information and exit
   -b --build                        Print version and build information and exit
+  -v --version                      Print version information and exit
   --dns-record=DNSRECORD            DNS record to check. A local record is recommended.
   --dns-port=DNSPORT                DNS port [default: 53]
   --consul                          Check consul DNS as well
