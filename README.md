@@ -10,11 +10,13 @@
 
 ## Preamble
 
-This application checks the local DNS and optionally consul and serves the status through a Web page.
+This application checks the local DNS and optionally Consul DNS and serves the status through a Web page.
 
-What problems tries to solve this application? UDP can't be easily checked. I run a check and report it through HTTP status code.
+What problems this application tries to solve? UDP can't be easily checked. I run a check and report it through a HTTP status code.
 
-This application runs as a daemon on the same machine running the DNS and it can to be used in conjunction with your UDP load-balancer to check the status of your DNS.
+At the same time my understanding is that LVS does not allow to run multiple instances of the same check. For instance, LVS has a `DNS_CHECK` statement, but in my case I need to run it multiple times, to check either the DNS and Consul DNS.
+
+This application runs as a daemon on the same machine where the DNS is running and it can be used in conjunction with your UDP load-balancer to check the status of your DNS.
 
 You can also use it from Nagios, Sensu and issue a simple HTTP check.
 
@@ -100,7 +102,9 @@ curl http://localhost:10053/ipv4
 
 In this case I am also checking for Consul, and I check the existance of one local record called `dumb-record.dumb.zone` in the DNS and one record called `consul.service.domain.org` in Consul.
 
-It is not sensible to check for a record on a forwarded zone, because there can be a problem in the network, or in he SOA of the other domain and we don't want to bring our DNS down if something else is broken.
+It is not sensible to check for a record on a forwarded zone, because there can be a problem elsewhere (in the network, or in he SOA of the other domain) and we don't want to bring our DNS down if something else is broken.
+
+You can choose any user and group:
 
 ```systemd
 #
@@ -112,8 +116,8 @@ Wants=basic.target
 After=basic.target network.target
 
 [Service]
-User=root
-Group=root
+User=unbound
+Group=unbound
 ExecStart=/usr/bin/dns-checker --consul --consul-record=consul.service.domain.org --dns-record=dumb-record.dumb.zone
 Restart=on-failure
 RestartSec=10
@@ -124,5 +128,3 @@ SyslogIdentifier=dns-checker
 [Install]
 WantedBy=multi-user.target
 ```
-
-you can change user and group as you don't need to run it as root :-)
