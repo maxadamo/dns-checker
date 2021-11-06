@@ -176,7 +176,7 @@ Options:
 	listenPort := arguments["--listen-port"].(string)
 
 	http.HandleFunc("/ipv4", ipv4)
-	http.HandleFunc("/ipv6", ipv6) // IPv6 can be left always. If it's not needed it won't be used.
+	http.HandleFunc("/ipv6", ipv6) // IPv6 can be left always on. If it's not needed it won't be used.
 
 	if listenAddress == "any" {
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), nil))
