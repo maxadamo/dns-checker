@@ -30,7 +30,6 @@ var statusTemplate, _ = template.New("status template").Parse(`<!DOCTYPE html>
 var (
 	appVersion    string
 	buildTime     string
-	consulBool    bool
 	dnsPort       string
 	consulPort    string
 	dnsRecord     string
@@ -38,7 +37,8 @@ var (
 	WarningLogger *log.Logger
 	InfoLogger    *log.Logger
 	ErrorLogger   *log.Logger
-	verbose       bool
+	verboseBool   bool
+	consulBool    bool
 )
 
 func init() {
@@ -105,32 +105,30 @@ func checkDNS(proto string, DNSport string, consulPort string, recordDNS string,
 func ipv4(w http.ResponseWriter, req *http.Request) {
 	ipv4_dns_status := checkDNS("ipv4", dnsPort, consulPort, dnsRecord, consulRecord, consulBool)
 	if ipv4_dns_status == "DNS is UP" {
-		if verbose {
+		if verboseBool {
 			InfoLogger.Println(ipv4_dns_status)
 		}
 		w.WriteHeader(http.StatusOK)
-		statusTemplate.Execute(w, template.HTML(ipv4_dns_status))
 	} else {
 		WarningLogger.Println(ipv4_dns_status)
 		w.WriteHeader(http.StatusServiceUnavailable)
-		statusTemplate.Execute(w, template.HTML(ipv4_dns_status))
 	}
+	statusTemplate.Execute(w, template.HTML(ipv4_dns_status))
 }
 
 // serve directory ipv6
 func ipv6(w http.ResponseWriter, req *http.Request) {
 	ipv6_dns_status := checkDNS("ipv6", dnsPort, consulPort, dnsRecord, consulRecord, consulBool)
 	if ipv6_dns_status == "DNS is UP" {
-		if verbose {
+		if verboseBool {
 			InfoLogger.Println(ipv6_dns_status)
 		}
 		w.WriteHeader(http.StatusOK)
-		statusTemplate.Execute(w, template.HTML(ipv6_dns_status))
 	} else {
 		WarningLogger.Println(ipv6_dns_status)
 		w.WriteHeader(http.StatusServiceUnavailable)
-		statusTemplate.Execute(w, template.HTML(ipv6_dns_status))
 	}
+	statusTemplate.Execute(w, template.HTML(ipv6_dns_status))
 }
 
 func main() {
@@ -139,24 +137,24 @@ func main() {
 
 	usage := fmt.Sprintf(`DNS Checker:
   - checks DNS and optionally Consul and report the status on a Web page
-  
+
 Usage:
-  %v --dns-record=DNSRECORD [--dns-port=DNSPORT] [--consul-port=CONSULPORT] [--consul-record=CONSULRECORD] [--consul] [--verbose] [--listen-port=LISTENPORT] [--listen-address=LISTENADDRESS]
+  %v --dns-record=DNSRECORD [--dns-port=DNSPORT] [--consul] [--consul-record=CONSULRECORD] [--consul-port=CONSULPORT] [--listen-address=LISTENADDRESS] [--listen-port=LISTENPORT] [--verbose]
   %v -h | --help
-  %v -b | --build
   %v -v | --version
-  
+  %v -b | --build
+
 Options:
   -h --help                         Show this screen
   -v --version                      Print version information and exit
   -b --build                        Print version and build information and exit
   --dns-record=DNSRECORD            DNS record to check. A local record is recommended.
   --dns-port=DNSPORT                DNS port [default: 53]
-  --consul-port=CONSULPORT          Consul port [default: 8600]
-  --consul-record=CONSULRECORD      Consul record to check [default: consul.service.consul]
   --consul                          Check consul DNS as well
-  --listen-port=LISTENPORT          Web server port [default: 10053]
+  --consul-record=CONSULRECORD      Consul record to check [default: consul.service.consul]
+  --consul-port=CONSULPORT          Consul port [default: 8600]
   --listen-address=LISTENADDRESS    Web server address. Check Go net/http documentation [default: any]
+  --listen-port=LISTENPORT          Web server port [default: 10053]
   --verbose                         Log also successful connections
 `, progName, progName, progName, progName)
 
@@ -167,21 +165,15 @@ Options:
 		os.Exit(0)
 	}
 
-	consulBool = false
-	if arguments["--consul"] == true {
-		consulBool = true
-	}
-	verbose = false
-	if arguments["--verbose"] == true {
-		verbose = true
-	}
+	consulBool = arguments["--consul"].(bool)
+	verboseBool = arguments["--verbose"].(bool)
 
-	dnsPort = arguments["--dns-port"].(string)
-	consulPort = arguments["--consul-port"].(string)
 	dnsRecord = arguments["--dns-record"].(string)
+	dnsPort = arguments["--dns-port"].(string)
 	consulRecord = arguments["--consul-record"].(string)
-	listenPort := arguments["--listen-port"].(string)
+	consulPort = arguments["--consul-port"].(string)
 	listenAddress := arguments["--listen-address"].(string)
+	listenPort := arguments["--listen-port"].(string)
 
 	http.HandleFunc("/ipv4", ipv4)
 	http.HandleFunc("/ipv6", ipv6) // IPv6 can be left on by default. If not needed it won't be used.
