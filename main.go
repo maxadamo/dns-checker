@@ -167,16 +167,16 @@ Options:
 
 	consulBool = arguments["--consul"].(bool)
 	verboseBool = arguments["--verbose"].(bool)
-
 	dnsRecord = arguments["--dns-record"].(string)
 	dnsPort = arguments["--dns-port"].(string)
 	consulRecord = arguments["--consul-record"].(string)
 	consulPort = arguments["--consul-port"].(string)
+
 	listenAddress := arguments["--listen-address"].(string)
 	listenPort := arguments["--listen-port"].(string)
 
 	http.HandleFunc("/ipv4", ipv4)
-	http.HandleFunc("/ipv6", ipv6) // IPv6 can be left on by default. If not needed it won't be used.
+	http.HandleFunc("/ipv6", ipv6) // IPv6 can be left always. If it's not needed it won't be used.
 
 	if listenAddress == "any" {
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), nil))
