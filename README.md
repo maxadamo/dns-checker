@@ -10,11 +10,9 @@
 
 ## Preamble
 
-This application checks the local DNS and optionally Consul DNS and serves the status through a Web page.
+What problems this application tries to solve? UDP can't be easily checked. This application checks the local DNS and optionally Consul DNS and serves the status through a Web page.
 
-What problems this application tries to solve? UDP can't be easily checked. I run a check and report it through a HTTP status code.
-
-At the same time my understanding is that LVS does not allow to run multiple instances of the same check. For instance, LVS has a `DNS_CHECK` statement, but in my case I need to run it multiple times, to check either the DNS and Consul DNS.
+I use it in conjunction with LVS and my understanding is that LVS does not allow to run multiple instances of the same check. For instance, LVS has a `DNS_CHECK` statement, but in my case I need to run it multiple times, to check either the DNS and Consul DNS.
 
 This application runs as a daemon on the same machine where the DNS is running and it can be used in conjunction with your UDP load-balancer to check the status of your DNS.
 
