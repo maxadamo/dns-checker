@@ -148,7 +148,7 @@ Options:
   -h --help                         Show this screen
   -b --build                        Print version and build information and exit
   -v --version                      Print version information and exit
-  --dns-record=DNSRECORD            DNS record to check. A local record is recommended.
+  --dns-record=DNSRECORD            DNS record to check. A record from a local zone is recommended
   --dns-port=DNSPORT                DNS port [default: 53]
   --consul                          Check consul DNS as well
   --consul-record=CONSULRECORD      Consul record to check [default: consul.service.consul]

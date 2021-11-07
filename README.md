@@ -100,11 +100,11 @@ curl http://localhost:10053/ipv4
 
 ## Setting up systemd
 
-In this case I am also checking for Consul, and I check the existance of one local record called `dumb-record.dumb.zone` in the DNS and one record called `consul.service.domain.org` in Consul.
+In this case I am also checking Consul, and I check the existance of one local record called `dumb-record.dumb.zone` in the DNS and one record called `consul.service.domain.org` in Consul.
 
 It is not sensible to check for a record on a forwarded zone, because there can be a problem elsewhere (in the network, or in he SOA of the other domain) and we don't want to bring our DNS down if something else is broken.
 
-You can choose any user and group:
+In this case I run it as `unbound` user because I use unbound:
 
 ```systemd
 #
