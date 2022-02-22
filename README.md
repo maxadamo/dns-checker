@@ -126,4 +126,3 @@ SyslogIdentifier=dns-checker
 [Install]
 WantedBy=multi-user.target
 ```
-
